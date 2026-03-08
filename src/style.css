@@ -669,6 +669,12 @@ input[type="text"]:focus, textarea:focus {
   font-size: 0.9rem;
 }
 
+#commit-status {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
 /* === Buttons === */
 .btn {
   padding: 0.5rem 1.25rem;
@@ -686,6 +692,12 @@ input[type="text"]:focus, textarea:focus {
   border-color: var(--primary);
 }
 .btn.primary:hover { background: var(--primary-dark); }
+.btn.commit {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.btn.commit:hover { background: #d45a3e; }
 
 /* === Toast === */
 .toast {

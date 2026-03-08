@@ -88,6 +88,26 @@ export async function loadPlan(weekKey) {
   return doc.exists ? doc.data() : null;
 }
 
+// === Committed Plans (finalized, visible on "This Week") ===
+
+export async function commitPlan(weekKey, plan) {
+  const committed = { ...plan, committed: true, committedAt: Date.now() };
+  if (!firebaseEnabled) {
+    localStorage.setItem(`committed_${weekKey}`, JSON.stringify(committed));
+    return;
+  }
+  await db.collection("committedPlans").doc(weekKey).set(committed);
+}
+
+export async function loadCommittedPlan(weekKey) {
+  if (!firebaseEnabled) {
+    const data = localStorage.getItem(`committed_${weekKey}`);
+    return data ? JSON.parse(data) : null;
+  }
+  const doc = await db.collection("committedPlans").doc(weekKey).get();
+  return doc.exists ? doc.data() : null;
+}
+
 // === Comments ===
 
 export async function addComment(weekKey, memberName, text) {

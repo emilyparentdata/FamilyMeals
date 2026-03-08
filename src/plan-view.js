@@ -1,4 +1,4 @@
-import { loadPlan, loadComments, addComment } from './firebase.js';
+import { loadCommittedPlan, loadComments, addComment } from './firebase.js';
 import { getRecipeByUid } from './recipes.js';
 import { getWeekKey, getWeekLabel, getCurrentWeekStart } from './planner.js';
 
@@ -8,11 +8,11 @@ export async function renderPlanView(gridContainer, commentsListEl, weekLabelEl)
   const weekKey = getWeekKey();
   weekLabelEl.textContent = getWeekLabel();
 
-  const plan = await loadPlan(weekKey);
+  const plan = await loadCommittedPlan(weekKey);
   gridContainer.innerHTML = '';
 
   if (!plan || !plan.days) {
-    gridContainer.innerHTML = '<p style="color:var(--text-light);padding:2rem;">No plan for this week yet. Go to "Plan Week" to get started.</p>';
+    gridContainer.innerHTML = '<p style="color:var(--text-light);padding:2rem;">No committed plan for this week yet. Go to "Plan Week", set it up, and hit "Commit This Plan".</p>';
     commentsListEl.innerHTML = '';
     return;
   }

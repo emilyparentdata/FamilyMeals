@@ -1,4 +1,4 @@
-import { loadPlan } from './firebase.js';
+import { loadCommittedPlan } from './firebase.js';
 import { getRecipeByUid } from './recipes.js';
 import { getWeekKey, getWeekLabel } from './planner.js';
 
@@ -8,7 +8,7 @@ export async function renderGroceryList(container, weekLabelEl) {
   const weekKey = getWeekKey();
   weekLabelEl.textContent = getWeekLabel();
 
-  const plan = await loadPlan(weekKey);
+  const plan = await loadCommittedPlan(weekKey);
   container.innerHTML = '';
 
   if (!plan || !plan.days) {

@@ -1,4 +1,4 @@
-import { initFirebase, getMembers, saveRecipeToFirebase } from './firebase.js';
+import { initFirebase, getMembers, saveRecipeToFirebase, loadPlan, commitPlan, loadCommittedPlan } from './firebase.js';
 import { loadRecipes, getRecipes, renderRecipeList, renderRecipeDetail, filterRecipes } from './recipes.js';
 import { initPreferences, renderPreferenceList, getAllPreferences } from './preferences.js';
 import { renderPlanner, suggestAllMeals, shiftWeek, getWeekLabel, getWeekKey } from './planner.js';
@@ -159,11 +159,34 @@ function setupPlannerPage() {
     refreshPlanner();
     showToast('All meals cleared.');
   });
+  document.getElementById('commit-plan-btn').addEventListener('click', async () => {
+    const weekKey = getWeekKey();
+    const plan = await loadPlan(weekKey);
+    if (!plan || !plan.days) {
+      showToast('Nothing to commit — plan the week first.');
+      return;
+    }
+    await commitPlan(weekKey, plan);
+    updateCommitStatus(weekKey);
+    showToast('Plan committed! It\'s now visible on "This Week\'s Plan".');
+  });
+}
+
+async function updateCommitStatus(weekKey) {
+  const el = document.getElementById('commit-status');
+  const committed = await loadCommittedPlan(weekKey);
+  if (committed?.committedAt) {
+    el.textContent = `Last committed: ${new Date(committed.committedAt).toLocaleString()}`;
+  } else {
+    el.textContent = 'Not yet committed — "This Week" won\'t show this plan until you commit.';
+  }
 }
 
 function refreshPlanner() {
+  const weekKey = getWeekKey();
   document.getElementById('week-label').textContent = getWeekLabel();
   renderPlanner(document.getElementById('planner-grid'), members);
+  updateCommitStatus(weekKey);
 }
 
 // === Plan View Page ===
