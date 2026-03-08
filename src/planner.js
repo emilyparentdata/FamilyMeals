@@ -93,6 +93,9 @@ export async function renderPlanner(container, members) {
   const plan = await loadPlan(weekKey) || { days: {} };
   const recipes = getRecipes();
 
+  // Filter Clare out of planner members
+  const plannerMembers = members.filter(m => m !== 'Clare');
+
   container.innerHTML = '';
 
   // Step 1: Constraint cards for each day
@@ -102,7 +105,7 @@ export async function renderPlanner(container, members) {
     const dayName = DAYS[i];
     const dayData = plan.days[dayName] || {};
 
-    const whoHome = dayData.whoHome || members.map(m => m);
+    const whoHome = dayData.whoHome || [...plannerMembers];
 
     const dayEl = document.createElement('div');
     dayEl.className = 'planner-day';
@@ -115,13 +118,14 @@ export async function renderPlanner(container, members) {
         <h3>${dayName} <small style="color:var(--text-light);font-weight:normal">${formatDate(dayDate)}</small></h3>
         <div class="who-home">
           Home:
-          ${members.map(m => `
+          ${plannerMembers.map(m => `
             <label><input type="checkbox" data-member="${escAttr(m)}" ${whoHome.includes(m) ? 'checked' : ''}> ${escHtml(m)}</label>
           `).join('')}
         </div>
         <label><input type="checkbox" class="dad-cooks" ${dayData.dadCooks ? 'checked' : ''}> Dad cooks</label>
         <label><input type="checkbox" class="make-ahead" ${dayData.makeAhead ? 'checked' : ''}> Make ahead</label>
         <label><input type="checkbox" class="skip-day" ${dayData.skip ? 'checked' : ''}> Skip</label>
+        <label><input type="checkbox" class="leftover-day" ${dayData.leftover ? 'checked' : ''}> Leftover/Choice</label>
       </div>
       <div class="planner-day-meal">
         <select class="meal-select">
@@ -183,6 +187,7 @@ function getDayDataFromEl(dayEl, members) {
     dadCooks: dayEl.querySelector('.dad-cooks')?.checked || false,
     makeAhead: dayEl.querySelector('.make-ahead')?.checked || false,
     skip: dayEl.querySelector('.skip-day')?.checked || false,
+    leftover: dayEl.querySelector('.leftover-day')?.checked || false,
     recipeUid: dayEl.querySelector('.meal-select')?.value || '',
     sides: dayEl.querySelector('.sides-input')?.value || '',
   };
@@ -224,7 +229,7 @@ function collectAssignedProteins(plan, excludeDay) {
 
 function suggestMealForDay(dayEl, members, recentUids, assignedThisWeek, assignedProteins) {
   const dayData = getDayDataFromEl(dayEl, members);
-  if (dayData.skip) return null;
+  if (dayData.skip || dayData.leftover) return null;
 
   const recipes = getRecipes();
   const prefs = getAllPreferences();
@@ -336,7 +341,8 @@ export async function suggestAllMeals(container, members) {
         const dayEl = dayEls[idx];
         const currentMeal = dayEl.querySelector('.meal-select').value;
         const isSkip = dayEl.querySelector('.skip-day')?.checked;
-        if (!currentMeal && !isSkip) {
+        const isLeftover = dayEl.querySelector('.leftover-day')?.checked;
+        if (!currentMeal && !isSkip && !isLeftover) {
           experimentDay = preferred;
           break;
         }
@@ -350,8 +356,9 @@ export async function suggestAllMeals(container, members) {
     const dayName = DAYS[i];
     const currentMeal = dayEl.querySelector('.meal-select').value;
     const isSkip = dayEl.querySelector('.skip-day')?.checked;
+    const isLeftover = dayEl.querySelector('.leftover-day')?.checked;
 
-    if (!currentMeal && !isSkip) {
+    if (!currentMeal && !isSkip && !isLeftover) {
       // Assign experiment on the chosen day
       if (dayName === experimentDay && experimentPick) {
         dayEl.querySelector('.meal-select').value = experimentPick.uid;

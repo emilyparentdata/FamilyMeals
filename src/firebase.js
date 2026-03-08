@@ -108,10 +108,10 @@ export async function loadComments(weekKey) {
   }
   const snapshot = await db.collection("comments")
     .where("weekKey", "==", weekKey)
-    .orderBy("timestamp")
     .get();
   const comments = [];
   snapshot.forEach(doc => comments.push(doc.data()));
+  comments.sort((a, b) => a.timestamp - b.timestamp);
   return comments;
 }
 

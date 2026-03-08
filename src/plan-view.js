@@ -24,10 +24,12 @@ export async function renderPlanView(gridContainer, commentsListEl, weekLabelEl)
     const dayData = plan.days[dayName] || {};
 
     const card = document.createElement('div');
-    card.className = `plan-day-card${dayData.skip ? ' skip' : ''}`;
+    card.className = `plan-day-card${dayData.skip || dayData.leftover ? ' skip' : ''}`;
 
     const recipe = dayData.recipeUid ? getRecipeByUid(dayData.recipeUid) : null;
-    const mealName = dayData.skip ? 'Skipped' : (recipe ? recipe.name : 'No meal planned');
+    const mealName = dayData.skip ? 'Skipped'
+      : dayData.leftover ? 'Leftover/Choice'
+      : (recipe ? recipe.name : 'No meal planned');
 
     const flags = [];
     if (dayData.dadCooks) flags.push('Dad cooks');
