@@ -359,21 +359,25 @@ export async function suggestAllMeals(container, members) {
     const isLeftover = dayEl.querySelector('.leftover-day')?.checked;
 
     if (!currentMeal && !isSkip && !isLeftover) {
-      // Assign experiment on the chosen day
+      let assigned = false;
+
+      // Try to assign experiment on the chosen day
       if (dayName === experimentDay && experimentPick) {
-        dayEl.querySelector('.meal-select').value = experimentPick.uid;
+        // Set the value directly in the plan (don't rely on select DOM)
         plan.days[dayName] = getDayDataFromEl(dayEl, members);
         plan.days[dayName].recipeUid = experimentPick.uid;
-        continue;
+        assigned = true;
       }
 
-      const assignedThisWeek = collectAssignedThisWeek(plan, dayName);
-      const assignedProteins = collectAssignedProteins(plan, dayName);
-      const suggested = suggestMealForDay(dayEl, members, recentUids, assignedThisWeek, assignedProteins);
-      if (suggested) {
-        dayEl.querySelector('.meal-select').value = suggested.uid;
-        plan.days[dayName] = getDayDataFromEl(dayEl, members);
-        plan.days[dayName].recipeUid = suggested.uid;
+      // Normal suggestion if no experiment assigned
+      if (!assigned) {
+        const assignedThisWeek = collectAssignedThisWeek(plan, dayName);
+        const assignedProteins = collectAssignedProteins(plan, dayName);
+        const suggested = suggestMealForDay(dayEl, members, recentUids, assignedThisWeek, assignedProteins);
+        if (suggested) {
+          plan.days[dayName] = getDayDataFromEl(dayEl, members);
+          plan.days[dayName].recipeUid = suggested.uid;
+        }
       }
     }
   }

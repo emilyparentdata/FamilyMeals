@@ -558,25 +558,49 @@ input[type="text"]:focus, textarea:focus {
 
 /* === Grocery === */
 #grocery-list {
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-  box-shadow: var(--shadow);
   margin-bottom: 1rem;
 }
-#grocery-list ul {
+.grocery-day {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow);
+  margin-bottom: 0.75rem;
+}
+.grocery-day h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--primary-dark);
+  margin-bottom: 0.35rem;
+}
+.grocery-meal-name {
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+}
+.grocery-ingredients {
   list-style: none;
   columns: 2;
-  gap: 2rem;
+  gap: 1.5rem;
+  padding: 0;
 }
-#grocery-list li {
-  padding: 0.3rem 0;
-  border-bottom: 1px solid var(--bg);
+.grocery-ingredients li {
+  padding: 0.2rem 0;
+  font-size: 0.85rem;
+  color: var(--text);
   break-inside: avoid;
+  line-height: 1.4;
+}
+.grocery-skip {
+  color: var(--text-light);
+  font-style: italic;
   font-size: 0.9rem;
 }
-#grocery-list li input[type="checkbox"] {
-  margin-right: 0.5rem;
+.grocery-no-ingredients {
+  color: var(--text-light);
+  font-style: italic;
+  font-size: 0.85rem;
 }
 
 /* === Manage === */
@@ -721,7 +745,7 @@ input[type="text"]:focus, textarea:focus {
   header { flex-direction: column; align-items: flex-start; }
   #member-picker { margin-left: 0; }
   .recipe-grid { grid-template-columns: 1fr; }
-  #grocery-list ul { columns: 1; }
+  .grocery-ingredients { columns: 1; }
   .pref-row { flex-direction: column; align-items: flex-start; }
   .plan-day-card { flex-direction: column; align-items: flex-start; }
 }

@@ -42,7 +42,7 @@ export function getExperiments() {
 }
 
 export function getRecipeByUid(uid) {
-  return allRecipes.find(r => r.uid === uid);
+  return allRecipes.find(r => r.uid === uid) || experimentRecipes.find(r => r.uid === uid);
 }
 
 export function renderRecipeList(container, recipes, onClick, preferences) {
