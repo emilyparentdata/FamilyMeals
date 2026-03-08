@@ -18,6 +18,7 @@
       <button class="nav-btn" data-page="planner">Plan Week</button>
       <button class="nav-btn" data-page="plan-view">This Week</button>
       <button class="nav-btn" data-page="grocery">Grocery List</button>
+      <button class="nav-btn" data-page="experiments">Experiments</button>
       <button class="nav-btn" data-page="manage">Manage</button>
     </nav>
     <div id="member-picker">
@@ -60,6 +61,11 @@
           <span class="home-card-title">Grocery List</span>
           <span class="home-card-desc">Auto-generated from this week's meals</span>
         </button>
+        <button class="home-card" data-page="experiments">
+          <span class="home-card-icon">&#129514;</span>
+          <span class="home-card-title">Experiments</span>
+          <span class="home-card-desc">New recipes to try — rate them after cooking</span>
+        </button>
         <button class="home-card" data-page="manage">
           <span class="home-card-icon">&#9998;</span>
           <span class="home-card-title">Manage Recipes</span>
@@ -90,7 +96,7 @@
         <h2>Rate Recipes</h2>
         <input type="text" id="pref-search" placeholder="Search recipes...">
         <div id="pref-filter-bar">
-          <label><input type="checkbox" id="pref-filter-unrated"> Show unrated only</label>
+          <label><input type="checkbox" id="pref-filter-unrated" checked> Show unrated only</label>
         </div>
       </div>
       <div id="pref-list"></div>
@@ -144,6 +150,15 @@
       <div id="grocery-list"></div>
       <button id="copy-grocery-btn" class="btn">Copy to Clipboard</button>
       <button id="email-plan-btn" class="btn primary">Email Plan + Grocery List</button>
+    </section>
+
+    <!-- Experiments Page -->
+    <section id="page-experiments" class="page hidden">
+      <div class="page-header">
+        <h2>Experiments</h2>
+      </div>
+      <p class="planner-instructions">Recipes we haven't tried yet. The planner suggests one experiment per week on weekends. After trying one, rate it here — successes join the regular rotation, failures get removed.</p>
+      <div id="experiments-list"></div>
     </section>
 
     <!-- Manage Recipes Page -->

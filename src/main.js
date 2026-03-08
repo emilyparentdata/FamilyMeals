@@ -5,6 +5,7 @@ import { renderPlanner, suggestAllMeals, shiftWeek, getWeekLabel, getWeekKey } f
 import { renderPlanView, handleAddComment } from './plan-view.js';
 import { renderGroceryList, getGroceryText } from './grocery.js';
 import { sendPlanEmail, isEmailConfigured } from './email.js';
+import { renderExperimentsPage } from './experiments.js';
 
 // === State ===
 let currentMember = '';
@@ -60,6 +61,7 @@ function showPage(pageId) {
   if (pageId === 'planner') refreshPlanner();
   if (pageId === 'plan-view') refreshPlanView();
   if (pageId === 'grocery') refreshGrocery();
+  if (pageId === 'experiments') refreshExperiments();
 }
 
 // === Member Picker ===
@@ -235,6 +237,11 @@ function refreshGrocery() {
     document.getElementById('grocery-list'),
     document.getElementById('grocery-week-label')
   );
+}
+
+// === Experiments Page ===
+function refreshExperiments() {
+  renderExperimentsPage(document.getElementById('experiments-list'));
 }
 
 // === Manage Page ===

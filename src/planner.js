@@ -1,4 +1,4 @@
-import { getRecipes, getRecipeByUid } from './recipes.js';
+import { getRecipes, getRecipeByUid, getExperiments } from './recipes.js';
 import { getAllPreferences } from './preferences.js';
 import { savePlan, loadPlan } from './firebase.js';
 
@@ -108,6 +108,8 @@ export async function renderPlanner(container, members) {
     dayEl.className = 'planner-day';
     dayEl.dataset.day = dayName;
 
+    const experiments = getExperiments();
+
     dayEl.innerHTML = `
       <div class="planner-day-header">
         <h3>${dayName} <small style="color:var(--text-light);font-weight:normal">${formatDate(dayDate)}</small></h3>
@@ -124,10 +126,18 @@ export async function renderPlanner(container, members) {
       <div class="planner-day-meal">
         <select class="meal-select">
           <option value="">-- Select meal --</option>
-          ${recipes.map(r => `<option value="${escAttr(r.uid)}" ${dayData.recipeUid === r.uid ? 'selected' : ''}>${escHtml(r.name)}</option>`).join('')}
+          <optgroup label="Recipes">
+            ${recipes.map(r => `<option value="${escAttr(r.uid)}" ${dayData.recipeUid === r.uid ? 'selected' : ''}>${escHtml(r.name)}</option>`).join('')}
+          </optgroup>
+          <optgroup label="Experiments">
+            ${experiments.map(r => `<option value="${escAttr(r.uid)}" ${dayData.recipeUid === r.uid ? 'selected' : ''}>${escHtml(r.name)}</option>`).join('')}
+          </optgroup>
         </select>
         <button class="suggest-btn">Re-suggest</button>
         <button class="clear-btn">Clear</button>
+      </div>
+      <div class="planner-day-sides">
+        <input type="text" class="sides-input" placeholder="Sides (e.g. rice, salad, bread)" value="${escAttr(dayData.sides || '')}">
       </div>
     `;
 
@@ -136,6 +146,7 @@ export async function renderPlanner(container, members) {
 
     dayEl.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', saveDay));
     dayEl.querySelector('.meal-select').addEventListener('change', saveDay);
+    dayEl.querySelector('.sides-input').addEventListener('change', saveDay);
 
     // Single-day re-suggest
     dayEl.querySelector('.suggest-btn').addEventListener('click', async () => {
@@ -173,6 +184,7 @@ function getDayDataFromEl(dayEl, members) {
     makeAhead: dayEl.querySelector('.make-ahead')?.checked || false,
     skip: dayEl.querySelector('.skip-day')?.checked || false,
     recipeUid: dayEl.querySelector('.meal-select')?.value || '',
+    sides: dayEl.querySelector('.sides-input')?.value || '',
   };
 }
 
@@ -285,12 +297,52 @@ function suggestMealForDay(dayEl, members, recentUids, assignedThisWeek, assigne
 
 // === Suggest full week menu ===
 
+function pickExperimentForWeek(recentUids) {
+  const experiments = getExperiments();
+  // Prefer experiments not used recently
+  const fresh = experiments.filter(e => !recentUids.has(e.uid));
+  const pool = fresh.length ? fresh : experiments;
+  if (!pool.length) return null;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 export async function suggestAllMeals(container, members) {
   const weekKey = getWeekKey();
   const plan = await loadPlan(weekKey) || { days: {} };
   const recentUids = await getRecentRecipeUids();
 
   const dayEls = container.querySelectorAll('.planner-day');
+
+  // Check if an experiment is already assigned this week
+  const experiments = getExperiments();
+  const experimentUids = new Set(experiments.map(e => e.uid));
+  let hasExperiment = false;
+  for (const d of DAYS) {
+    if (plan.days[d]?.recipeUid && experimentUids.has(plan.days[d].recipeUid)) {
+      hasExperiment = true;
+      break;
+    }
+  }
+
+  // Pick one experiment for a weekend day if none assigned yet
+  let experimentDay = null;
+  let experimentPick = null;
+  if (!hasExperiment) {
+    experimentPick = pickExperimentForWeek(recentUids);
+    if (experimentPick) {
+      // Prefer Saturday, then Sunday, then Friday
+      for (const preferred of ['Saturday', 'Sunday', 'Friday']) {
+        const idx = DAYS.indexOf(preferred);
+        const dayEl = dayEls[idx];
+        const currentMeal = dayEl.querySelector('.meal-select').value;
+        const isSkip = dayEl.querySelector('.skip-day')?.checked;
+        if (!currentMeal && !isSkip) {
+          experimentDay = preferred;
+          break;
+        }
+      }
+    }
+  }
 
   // Process days sequentially so each day's pick informs the next
   for (let i = 0; i < dayEls.length; i++) {
@@ -300,6 +352,14 @@ export async function suggestAllMeals(container, members) {
     const isSkip = dayEl.querySelector('.skip-day')?.checked;
 
     if (!currentMeal && !isSkip) {
+      // Assign experiment on the chosen day
+      if (dayName === experimentDay && experimentPick) {
+        dayEl.querySelector('.meal-select').value = experimentPick.uid;
+        plan.days[dayName] = getDayDataFromEl(dayEl, members);
+        plan.days[dayName].recipeUid = experimentPick.uid;
+        continue;
+      }
+
       const assignedThisWeek = collectAssignedThisWeek(plan, dayName);
       const assignedProteins = collectAssignedProteins(plan, dayName);
       const suggested = suggestMealForDay(dayEl, members, recentUids, assignedThisWeek, assignedProteins);

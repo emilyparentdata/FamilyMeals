@@ -33,9 +33,11 @@ export async function renderPlanView(gridContainer, commentsListEl, weekLabelEl)
     if (dayData.dadCooks) flags.push('Dad cooks');
     if (dayData.makeAhead) flags.push('Make ahead');
 
+    const sides = dayData.sides ? `<span class="meal-sides">+ ${escHtml(dayData.sides)}</span>` : '';
+
     card.innerHTML = `
       <span class="day-name">${dayName}</span>
-      <span class="meal-name">${escHtml(mealName)}</span>
+      <span class="meal-name">${escHtml(mealName)}${sides}</span>
       <div class="meal-flags">
         ${flags.map(f => `<span class="flag-chip">${f}</span>`).join('')}
       </div>

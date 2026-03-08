@@ -1,27 +1,44 @@
 import { getArchivedRecipes, getCustomRecipes } from './firebase.js';
 
 let allRecipes = [];
+let experimentRecipes = [];
+
+const EXPERIMENT_PREFIXES = ['KA ', 'CC ', 'SKC ', 'SKK ', 'SKE '];
+
+export function isExperiment(recipe) {
+  return EXPERIMENT_PREFIXES.some(p => recipe.name.startsWith(p)) &&
+    !recipe.ingredients && !recipe.directions;
+}
 
 export async function loadRecipes() {
   const resp = await fetch('data/recipes.json');
-  allRecipes = await resp.json();
+  let all = await resp.json();
 
   // Add any custom recipes from local storage
   const custom = getCustomRecipes();
   if (custom.length) {
-    allRecipes = allRecipes.concat(custom);
+    all = all.concat(custom);
   }
 
   // Filter out archived
   const archived = new Set(getArchivedRecipes());
-  allRecipes = allRecipes.filter(r => !archived.has(r.uid));
+  all = all.filter(r => !archived.has(r.uid));
+
+  // Separate experiments from regular recipes
+  experimentRecipes = all.filter(r => isExperiment(r));
+  allRecipes = all.filter(r => !isExperiment(r));
 
   allRecipes.sort((a, b) => a.name.localeCompare(b.name));
+  experimentRecipes.sort((a, b) => a.name.localeCompare(b.name));
   return allRecipes;
 }
 
 export function getRecipes() {
   return allRecipes;
+}
+
+export function getExperiments() {
+  return experimentRecipes;
 }
 
 export function getRecipeByUid(uid) {

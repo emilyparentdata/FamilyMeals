@@ -16,26 +16,34 @@ export async function renderGroceryList(container, weekLabelEl) {
     return;
   }
 
-  // Collect all recipes for the week
+  // Collect all recipes and sides for the week
   const recipes = [];
   const mealList = [];
+  const allSides = [];
   for (const day of DAYS) {
     const dayData = plan.days[day];
-    if (!dayData || dayData.skip || !dayData.recipeUid) continue;
-    const recipe = getRecipeByUid(dayData.recipeUid);
-    if (recipe) {
-      recipes.push(recipe);
-      mealList.push({ day, recipe });
+    if (!dayData || dayData.skip) continue;
+    if (dayData.recipeUid) {
+      const recipe = getRecipeByUid(dayData.recipeUid);
+      if (recipe) {
+        recipes.push(recipe);
+        const sides = dayData.sides || '';
+        mealList.push({ day, name: recipe.name, sides });
+      }
+    }
+    if (dayData.sides) {
+      // Split sides by comma and collect
+      dayData.sides.split(',').map(s => s.trim()).filter(Boolean).forEach(s => allSides.push(s));
     }
   }
 
-  if (!recipes.length) {
+  if (!recipes.length && !allSides.length) {
     container.innerHTML = '<p style="color:var(--text-light);">No meals planned this week.</p>';
     return;
   }
 
   // Parse and combine ingredients
-  const ingredients = combineIngredients(recipes);
+  const ingredients = combineIngredients(recipes, allSides);
 
   let html = '<ul>';
   for (const item of ingredients) {
@@ -46,11 +54,11 @@ export async function renderGroceryList(container, weekLabelEl) {
   container.innerHTML = html;
 
   // Store for copy/email
-  container.dataset.mealList = JSON.stringify(mealList.map(m => ({ day: m.day, name: m.recipe.name })));
+  container.dataset.mealList = JSON.stringify(mealList.map(m => ({ day: m.day, name: m.name, sides: m.sides || '' })));
   container.dataset.ingredients = JSON.stringify(ingredients);
 }
 
-function combineIngredients(recipes) {
+function combineIngredients(recipes, sides) {
   const allLines = [];
 
   for (const recipe of recipes) {
@@ -59,6 +67,11 @@ function combineIngredients(recipes) {
     for (const line of lines) {
       allLines.push(line);
     }
+  }
+
+  // Add sides as grocery items
+  for (const side of sides) {
+    allLines.push(side);
   }
 
   // Simple deduplication: normalize and group similar items
@@ -82,7 +95,11 @@ export function getGroceryText() {
 export function getPlanSummary() {
   const container = document.getElementById('grocery-list');
   const meals = JSON.parse(container.dataset.mealList || '[]');
-  return meals.map(m => `${m.day}: ${m.name}`).join('\n');
+  return meals.map(m => {
+    let line = `${m.day}: ${m.name}`;
+    if (m.sides) line += ` + ${m.sides}`;
+    return line;
+  }).join('\n');
 }
 
 function escHtml(str) {

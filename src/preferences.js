@@ -61,7 +61,7 @@ export function renderPreferenceList(container, recipes, currentMember, searchQu
     row.innerHTML = `
       <span class="recipe-name">${escHtml(r.name)}</span>
       <div class="rating-btns">
-        ${['love', 'like', 'acceptable', 'unknown', 'unacceptable'].map(rating =>
+        ${['love', 'like', 'acceptable', 'unacceptable', 'unknown'].map(rating =>
           `<button class="rating-btn ${currentRating === rating ? 'selected' : ''}" data-rating="${rating}">${ratingLabel(rating)}</button>`
         ).join('')}
       </div>

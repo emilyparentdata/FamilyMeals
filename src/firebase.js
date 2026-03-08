@@ -151,6 +151,29 @@ export function getCustomRecipes() {
   return [];
 }
 
+// === Experiment Evaluations ===
+
+export async function saveExperimentEval(uid, result, ingredients, directions) {
+  const data = { uid, result, ingredients: ingredients || '', directions: directions || '', evaluated: Date.now() };
+  if (!firebaseEnabled) {
+    const evals = JSON.parse(localStorage.getItem("experiment_evals") || "{}");
+    evals[uid] = data;
+    localStorage.setItem("experiment_evals", JSON.stringify(evals));
+    return;
+  }
+  await db.collection("experimentEvals").doc(uid).set(data);
+}
+
+export async function loadExperimentEvals() {
+  if (!firebaseEnabled) {
+    return JSON.parse(localStorage.getItem("experiment_evals") || "{}");
+  }
+  const snapshot = await db.collection("experimentEvals").get();
+  const evals = {};
+  snapshot.forEach(doc => { evals[doc.id] = doc.data(); });
+  return evals;
+}
+
 // === Members ===
 
 const DEFAULT_MEMBERS = ["Emily", "Jesse", "Penelope", "Finn", "Clare"];

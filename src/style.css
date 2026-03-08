@@ -428,6 +428,29 @@ input[type="text"]:focus, textarea:focus {
   font-size: 0.8rem;
 }
 
+.planner-day-sides {
+  margin-top: 0.5rem;
+}
+.sides-input {
+  width: 100%;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+.sides-input:focus {
+  border-style: solid;
+  border-color: var(--primary);
+  background: white;
+}
+.meal-sides {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-left: 0.35rem;
+}
+
 .who-home {
   display: flex;
   gap: 0.5rem;
@@ -573,6 +596,56 @@ input[type="text"]:focus, textarea:focus {
 .btn.large {
   padding: 0.75rem 2rem;
   font-size: 1.05rem;
+}
+
+/* === Experiments === */
+.experiment-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow);
+  margin-bottom: 0.75rem;
+}
+.experiment-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.experiment-eval-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.experiment-card.evaluated {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+}
+.experiment-icon {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+.experiment-icon.success { color: var(--primary); }
+.experiment-icon.failure { color: var(--accent); }
+.experiment-name { font-weight: 500; }
+.experiment-status {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  margin-left: auto;
+}
+.experiment-untried-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.experiment-untried {
+  padding: 0.5rem 0.75rem;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-size: 0.9rem;
 }
 
 /* === Buttons === */
