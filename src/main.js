@@ -190,7 +190,38 @@ function refreshPlanner() {
 }
 
 // === Plan View Page ===
+let viewWeekOffset = 0;
+
+function getViewWeekStart() {
+  const d = new Date();
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff + viewWeekOffset * 7);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function getViewWeekKey() {
+  return getViewWeekStart().toISOString().slice(0, 10);
+}
+
+function getViewWeekLabel() {
+  const d = getViewWeekStart();
+  const end = new Date(d);
+  end.setDate(end.getDate() + 6);
+  const fmt = d2 => d2.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return `${fmt(d)} - ${fmt(end)}`;
+}
+
 function setupPlanViewPage() {
+  document.getElementById('view-prev-week').addEventListener('click', () => {
+    viewWeekOffset--;
+    refreshPlanView();
+  });
+  document.getElementById('view-next-week').addEventListener('click', () => {
+    viewWeekOffset++;
+    refreshPlanView();
+  });
   document.getElementById('add-comment-btn').addEventListener('click', async () => {
     const text = document.getElementById('comment-text').value;
     if (!currentMember) {
@@ -198,7 +229,7 @@ function setupPlanViewPage() {
       return;
     }
     await handleAddComment(
-      getWeekKey(),
+      getViewWeekKey(),
       currentMember,
       text,
       document.getElementById('comments-list')
@@ -212,7 +243,9 @@ function refreshPlanView() {
   renderPlanView(
     document.getElementById('plan-view-grid'),
     document.getElementById('comments-list'),
-    document.getElementById('view-week-label')
+    document.getElementById('view-week-label'),
+    getViewWeekKey(),
+    getViewWeekLabel()
   );
 }
 

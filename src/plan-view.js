@@ -4,21 +4,24 @@ import { getWeekKey, getWeekLabel, getCurrentWeekStart } from './planner.js';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-export async function renderPlanView(gridContainer, commentsListEl, weekLabelEl) {
-  const weekKey = getWeekKey();
-  weekLabelEl.textContent = getWeekLabel();
+export async function renderPlanView(gridContainer, commentsListEl, weekLabelEl, weekKeyOverride, weekLabelOverride) {
+  const weekKey = weekKeyOverride || getWeekKey();
+  weekLabelEl.textContent = weekLabelOverride || getWeekLabel();
 
   const plan = await loadCommittedPlan(weekKey);
   gridContainer.innerHTML = '';
 
   if (!plan || !plan.days) {
-    gridContainer.innerHTML = '<p style="color:var(--text-light);padding:2rem;">No committed plan for this week yet. Go to "Plan Week", set it up, and hit "Commit This Plan".</p>';
+    gridContainer.innerHTML = '<p style="color:var(--text-light);padding:2rem;">No committed plan for this week. Go to "Plan Week", set it up, and hit "Commit This Plan".</p>';
     commentsListEl.innerHTML = '';
     return;
   }
 
+  // Derive Monday from the weekKey
+  const monday = new Date(weekKey + 'T00:00:00');
+
   for (let i = 0; i < 7; i++) {
-    const dayDate = new Date(getCurrentWeekStart());
+    const dayDate = new Date(monday);
     dayDate.setDate(dayDate.getDate() + i);
     const dayName = DAYS[i];
     const dayData = plan.days[dayName] || {};
