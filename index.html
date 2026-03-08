@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family Meals</title>
+  <link rel="stylesheet" href="src/style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <header>
+    <h1 id="home-link" style="cursor:pointer">Family Meals</h1>
+    <nav id="main-nav">
+      <button class="nav-btn active" data-page="home">Home</button>
+      <button class="nav-btn" data-page="recipes">Recipes</button>
+      <button class="nav-btn" data-page="preferences">Rate Recipes</button>
+      <button class="nav-btn" data-page="planner">Plan Week</button>
+      <button class="nav-btn" data-page="plan-view">This Week</button>
+      <button class="nav-btn" data-page="grocery">Grocery List</button>
+      <button class="nav-btn" data-page="manage">Manage</button>
+    </nav>
+    <div id="member-picker">
+      <label>Who are you?</label>
+      <select id="current-member">
+        <option value="">Select...</option>
+      </select>
+    </div>
+  </header>
+
+  <main>
+    <!-- Home Page -->
+    <section id="page-home" class="page active">
+      <div class="home-hero">
+        <h2>What would you like to do?</h2>
+      </div>
+      <div class="home-grid">
+        <button class="home-card" data-page="recipes">
+          <span class="home-card-icon">&#128214;</span>
+          <span class="home-card-title">Browse Recipes</span>
+          <span class="home-card-desc">Search and view all 175 family recipes</span>
+        </button>
+        <button class="home-card" data-page="preferences">
+          <span class="home-card-icon">&#11088;</span>
+          <span class="home-card-title">Rate Recipes</span>
+          <span class="home-card-desc">Tell us what you love, like, or can't stand</span>
+        </button>
+        <button class="home-card" data-page="plan-view">
+          <span class="home-card-icon">&#128197;</span>
+          <span class="home-card-title">This Week's Plan</span>
+          <span class="home-card-desc">See what's for dinner and leave comments</span>
+        </button>
+        <button class="home-card" data-page="planner">
+          <span class="home-card-icon">&#129668;</span>
+          <span class="home-card-title">Plan the Week</span>
+          <span class="home-card-desc">Set who's home and get meal suggestions</span>
+        </button>
+        <button class="home-card" data-page="grocery">
+          <span class="home-card-icon">&#128722;</span>
+          <span class="home-card-title">Grocery List</span>
+          <span class="home-card-desc">Auto-generated from this week's meals</span>
+        </button>
+        <button class="home-card" data-page="manage">
+          <span class="home-card-icon">&#9998;</span>
+          <span class="home-card-title">Manage Recipes</span>
+          <span class="home-card-desc">Add new recipes to the collection</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Recipes Page -->
+    <section id="page-recipes" class="page hidden">
+      <div class="page-header">
+        <h2>All Recipes</h2>
+        <input type="text" id="recipe-search" placeholder="Search recipes...">
+      </div>
+      <div id="recipe-list" class="recipe-grid"></div>
+      <!-- Recipe Detail Modal -->
+      <div id="recipe-modal" class="modal hidden">
+        <div class="modal-content">
+          <button class="modal-close">&times;</button>
+          <div id="recipe-detail"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Preferences Page -->
+    <section id="page-preferences" class="page hidden">
+      <div class="page-header">
+        <h2>Rate Recipes</h2>
+        <input type="text" id="pref-search" placeholder="Search recipes...">
+        <div id="pref-filter-bar">
+          <label><input type="checkbox" id="pref-filter-unrated"> Show unrated only</label>
+        </div>
+      </div>
+      <div id="pref-list"></div>
+    </section>
+
+    <!-- Planner Page -->
+    <section id="page-planner" class="page hidden">
+      <div class="page-header">
+        <h2>Plan the Week</h2>
+        <div class="week-selector">
+          <button id="prev-week">&laquo; Prev</button>
+          <span id="week-label"></span>
+          <button id="next-week">Next &raquo;</button>
+        </div>
+      </div>
+      <p class="planner-instructions">Set who's home and any constraints for each day, then hit <strong>Suggest Meals</strong>. The system picks a varied menu avoiding repeated proteins and recent weeks' meals.</p>
+      <div id="planner-grid"></div>
+      <div class="planner-actions">
+        <button id="suggest-all-btn" class="btn primary large">Suggest Meals</button>
+        <button id="clear-all-btn" class="btn">Clear All</button>
+      </div>
+    </section>
+
+    <!-- This Week View -->
+    <section id="page-plan-view" class="page hidden">
+      <div class="page-header">
+        <h2>This Week's Plan</h2>
+        <span id="view-week-label"></span>
+      </div>
+      <div id="plan-view-grid"></div>
+      <div id="comments-section">
+        <h3>Comments</h3>
+        <div id="comments-list"></div>
+        <div id="comment-form">
+          <textarea id="comment-text" placeholder="Add a comment..."></textarea>
+          <button id="add-comment-btn" class="btn">Add Comment</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Grocery List Page -->
+    <section id="page-grocery" class="page hidden">
+      <div class="page-header">
+        <h2>Grocery List</h2>
+        <div class="week-selector">
+          <button id="grocery-prev-week">&laquo; Prev</button>
+          <span id="grocery-week-label"></span>
+          <button id="grocery-next-week">Next &raquo;</button>
+        </div>
+      </div>
+      <div id="grocery-list"></div>
+      <button id="copy-grocery-btn" class="btn">Copy to Clipboard</button>
+      <button id="email-plan-btn" class="btn primary">Email Plan + Grocery List</button>
+    </section>
+
+    <!-- Manage Recipes Page -->
+    <section id="page-manage" class="page hidden">
+      <h2>Manage Recipes</h2>
+      <div id="add-recipe-form">
+        <h3>Add New Recipe</h3>
+        <input type="text" id="new-recipe-name" placeholder="Recipe name" required>
+        <textarea id="new-recipe-ingredients" placeholder="Ingredients (one per line)"></textarea>
+        <textarea id="new-recipe-directions" placeholder="Directions"></textarea>
+        <div class="form-row">
+          <input type="text" id="new-recipe-servings" placeholder="Servings">
+          <input type="text" id="new-recipe-prep" placeholder="Prep time">
+          <input type="text" id="new-recipe-cook" placeholder="Cook time">
+        </div>
+        <input type="text" id="new-recipe-categories" placeholder="Categories (comma separated)">
+        <input type="text" id="new-recipe-source" placeholder="Source / URL">
+        <textarea id="new-recipe-notes" placeholder="Notes"></textarea>
+        <button id="save-recipe-btn" class="btn primary">Save Recipe</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
