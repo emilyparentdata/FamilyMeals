@@ -45,7 +45,7 @@ export function getRecipeByUid(uid) {
   return allRecipes.find(r => r.uid === uid);
 }
 
-export function renderRecipeList(container, recipes, onClick) {
+export function renderRecipeList(container, recipes, onClick, preferences) {
   container.innerHTML = '';
   if (!recipes.length) {
     container.innerHTML = '<p style="color:var(--text-light);padding:2rem;">No recipes found.</p>';
@@ -65,14 +65,42 @@ export function renderRecipeList(container, recipes, onClick) {
     const cats = (r.categories || [])
       .map(c => `<span class="category-tag">${esc(c)}</span>`).join('');
 
+    // Build rating summary from preferences
+    const ratingHtml = buildRatingSummary(r.uid, preferences);
+
     card.innerHTML = `
       <h3>${esc(r.name)}</h3>
       <div class="recipe-meta">${meta.map(m => `<span>${esc(m)}</span>`).join('')}</div>
+      ${ratingHtml}
       ${cats ? `<div class="recipe-categories">${cats}</div>` : ''}
     `;
     card.addEventListener('click', () => onClick(r));
     container.appendChild(card);
   }
+}
+
+function buildRatingSummary(recipeUid, preferences) {
+  if (!preferences) return '';
+
+  // Collect ratings for this recipe from all members
+  const ratings = [];
+  for (const [key, val] of Object.entries(preferences)) {
+    if (key.startsWith(recipeUid + '_') && val.rating && val.rating !== 'unknown') {
+      const member = key.slice(recipeUid.length + 1);
+      ratings.push({ member, rating: val.rating });
+    }
+  }
+
+  if (!ratings.length) return '<div class="recipe-ratings unrated">No ratings yet</div>';
+
+  const icons = { love: '\u2764', like: '\u{1F44D}', acceptable: '\u2713', unacceptable: '\u2717' };
+  const classes = { love: 'love', like: 'like', acceptable: 'ok', unacceptable: 'nope' };
+
+  const dots = ratings.map(r =>
+    `<span class="rating-dot ${classes[r.rating]}" title="${esc(r.member)}: ${r.rating}">${icons[r.rating]}</span>`
+  ).join('');
+
+  return `<div class="recipe-ratings">${dots}</div>`;
 }
 
 export function renderRecipeDetail(container, recipe) {

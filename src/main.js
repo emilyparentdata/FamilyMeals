@@ -1,6 +1,6 @@
 import { initFirebase, getMembers, saveRecipeToFirebase } from './firebase.js';
 import { loadRecipes, getRecipes, renderRecipeList, renderRecipeDetail, filterRecipes } from './recipes.js';
-import { initPreferences, renderPreferenceList } from './preferences.js';
+import { initPreferences, renderPreferenceList, getAllPreferences } from './preferences.js';
 import { renderPlanner, suggestAllMeals, shiftWeek, getWeekLabel, getWeekKey } from './planner.js';
 import { renderPlanView, handleAddComment } from './plan-view.js';
 import { renderGroceryList, getGroceryText } from './grocery.js';
@@ -106,10 +106,11 @@ function setupRecipesPage() {
 function refreshRecipes() {
   const query = document.getElementById('recipe-search').value;
   const recipes = filterRecipes(query);
+  const prefs = getAllPreferences();
   renderRecipeList(document.getElementById('recipe-list'), recipes, (recipe) => {
     renderRecipeDetail(document.getElementById('recipe-detail'), recipe);
     document.getElementById('recipe-modal').classList.remove('hidden');
-  });
+  }, prefs);
 }
 
 // === Preferences Page ===
