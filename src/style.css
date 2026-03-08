@@ -62,7 +62,14 @@ header h1 {
   transition: all 0.2s;
 }
 .nav-btn:hover { color: white; background: rgba(255,255,255,0.1); }
+.nav-btn.primary-nav { color: white; font-weight: 600; }
 .nav-btn.active { color: white; background: var(--primary); }
+.nav-sep {
+  width: 1px;
+  height: 1.2rem;
+  background: rgba(255,255,255,0.2);
+  align-self: center;
+}
 
 #member-picker {
   margin-left: auto;
@@ -119,20 +126,26 @@ input[type="text"]:focus, textarea:focus {
 }
 
 /* === Home Page === */
-.home-hero {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-.home-hero h2 {
-  font-size: 1.6rem;
-  color: var(--primary-dark);
-}
 .home-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 1.25rem;
   max-width: 800px;
   margin: 0 auto;
+}
+.home-grid.main-tiles {
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 2rem;
+}
+.home-grid.admin-tiles {
+  grid-template-columns: repeat(4, 1fr);
+}
+.home-section-label {
+  max-width: 800px;
+  margin: 0 auto 1rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-light);
 }
 .home-card {
   background: var(--card);
@@ -166,6 +179,15 @@ input[type="text"]:focus, textarea:focus {
   font-size: 0.8rem;
   color: var(--text-light);
   line-height: 1.4;
+}
+.home-card.small {
+  padding: 1rem 0.75rem;
+}
+.home-card.small .home-card-icon {
+  font-size: 1.6rem;
+}
+.home-card.small .home-card-title {
+  font-size: 0.9rem;
 }
 
 /* === Recipe Grid === */
@@ -745,6 +767,8 @@ input[type="text"]:focus, textarea:focus {
   header { flex-direction: column; align-items: flex-start; }
   #member-picker { margin-left: 0; }
   .recipe-grid { grid-template-columns: 1fr; }
+  .home-grid.main-tiles { grid-template-columns: 1fr; }
+  .home-grid.admin-tiles { grid-template-columns: repeat(2, 1fr); }
   .grocery-ingredients { columns: 1; }
   .pref-row { flex-direction: column; align-items: flex-start; }
   .plan-day-card { flex-direction: column; align-items: flex-start; }

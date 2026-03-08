@@ -13,11 +13,12 @@
     <h1 id="home-link" style="cursor:pointer">Family Meals</h1>
     <nav id="main-nav">
       <button class="nav-btn active" data-page="home">Home</button>
-      <button class="nav-btn" data-page="recipes">Recipes</button>
-      <button class="nav-btn" data-page="preferences">Rate Recipes</button>
+      <button class="nav-btn primary-nav" data-page="preferences">Rate Recipes</button>
+      <button class="nav-btn primary-nav" data-page="recipes">Recipes</button>
+      <button class="nav-btn primary-nav" data-page="plan-view">This Week</button>
+      <span class="nav-sep"></span>
       <button class="nav-btn" data-page="planner">Plan Week</button>
-      <button class="nav-btn" data-page="plan-view">This Week</button>
-      <button class="nav-btn" data-page="grocery">Grocery List</button>
+      <button class="nav-btn" data-page="grocery">Ingredients</button>
       <button class="nav-btn" data-page="experiments">Experiments</button>
       <button class="nav-btn" data-page="manage">Manage</button>
     </nav>
@@ -32,44 +33,40 @@
   <main>
     <!-- Home Page -->
     <section id="page-home" class="page active">
-      <div class="home-hero">
-        <h2>What would you like to do?</h2>
-      </div>
-      <div class="home-grid">
-        <button class="home-card" data-page="recipes">
-          <span class="home-card-icon">&#128214;</span>
-          <span class="home-card-title">Browse Recipes</span>
-          <span class="home-card-desc">Search and view all 175 family recipes</span>
-        </button>
+      <div class="home-grid main-tiles">
         <button class="home-card" data-page="preferences">
           <span class="home-card-icon">&#11088;</span>
           <span class="home-card-title">Rate Recipes</span>
           <span class="home-card-desc">Tell us what you love, like, or can't stand</span>
+        </button>
+        <button class="home-card" data-page="recipes">
+          <span class="home-card-icon">&#128214;</span>
+          <span class="home-card-title">Browse Recipes</span>
+          <span class="home-card-desc">Search and view all family recipes</span>
         </button>
         <button class="home-card" data-page="plan-view">
           <span class="home-card-icon">&#128197;</span>
           <span class="home-card-title">This Week's Plan</span>
           <span class="home-card-desc">See what's for dinner and leave comments</span>
         </button>
-        <button class="home-card" data-page="planner">
+      </div>
+      <h3 class="home-section-label">Admin Tasks</h3>
+      <div class="home-grid admin-tiles">
+        <button class="home-card small" data-page="planner">
           <span class="home-card-icon">&#129668;</span>
           <span class="home-card-title">Plan the Week</span>
-          <span class="home-card-desc">Set who's home and get meal suggestions</span>
         </button>
-        <button class="home-card" data-page="grocery">
+        <button class="home-card small" data-page="grocery">
           <span class="home-card-icon">&#128722;</span>
-          <span class="home-card-title">Grocery List</span>
-          <span class="home-card-desc">Auto-generated from this week's meals</span>
+          <span class="home-card-title">Meal Plan &amp; Ingredients</span>
         </button>
-        <button class="home-card" data-page="experiments">
+        <button class="home-card small" data-page="experiments">
           <span class="home-card-icon">&#129514;</span>
           <span class="home-card-title">Experiments</span>
-          <span class="home-card-desc">New recipes to try — rate them after cooking</span>
         </button>
-        <button class="home-card" data-page="manage">
+        <button class="home-card small" data-page="manage">
           <span class="home-card-icon">&#9998;</span>
           <span class="home-card-title">Manage Recipes</span>
-          <span class="home-card-desc">Add new recipes to the collection</span>
         </button>
       </div>
     </section>
