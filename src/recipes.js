@@ -14,9 +14,12 @@ export async function loadRecipes() {
   const resp = await fetch('data/recipes.json');
   let all = await resp.json();
 
-  // Add any custom recipes from local storage
+  // Add any custom recipes — if a custom recipe has the same UID
+  // as an existing one (e.g. promoted experiment), the custom version wins
   const custom = getCustomRecipes();
   if (custom.length) {
+    const customUids = new Set(custom.map(r => r.uid));
+    all = all.filter(r => !customUids.has(r.uid));
     all = all.concat(custom);
   }
 
