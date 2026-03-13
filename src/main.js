@@ -1,6 +1,6 @@
-import { initFirebase, getMembers, saveRecipeToFirebase, loadPlan, commitPlan, loadCommittedPlan } from './firebase.js';
+import { initFirebase, getMembers, saveRecipeToFirebase, archiveRecipe, loadPlan, commitPlan, loadCommittedPlan } from './firebase.js';
 import { loadRecipes, getRecipes, renderRecipeList, renderRecipeDetail, filterRecipes } from './recipes.js';
-import { initPreferences, renderPreferenceList, getAllPreferences } from './preferences.js';
+import { initPreferences, renderPreferenceList, getAllPreferences, toggleFavorite } from './preferences.js';
 import { renderPlanner, suggestAllMeals, shiftWeek, getWeekLabel, getWeekKey } from './planner.js';
 import { renderPlanView, handleAddComment } from './plan-view.js';
 import { renderGroceryList, getGroceryText } from './grocery.js';
@@ -62,6 +62,7 @@ function showPage(pageId) {
   if (pageId === 'plan-view') refreshPlanView();
   if (pageId === 'grocery') refreshGrocery();
   if (pageId === 'experiments') refreshExperiments();
+  if (pageId === 'manage') refreshManageRecipeList();
 }
 
 // === Member Picker ===
@@ -76,9 +77,12 @@ function populateMemberPicker() {
   }
   select.addEventListener('change', () => {
     currentMember = select.value;
-    // Refresh preferences if on that page
+    // Refresh current page to reflect member selection
     if (document.getElementById('page-preferences').classList.contains('active')) {
       refreshPreferences();
+    }
+    if (document.getElementById('page-recipes').classList.contains('active')) {
+      refreshRecipes();
     }
   });
 }
@@ -110,7 +114,13 @@ function refreshRecipes() {
   renderRecipeList(document.getElementById('recipe-list'), recipes, (recipe) => {
     renderRecipeDetail(document.getElementById('recipe-detail'), recipe);
     document.getElementById('recipe-modal').classList.remove('hidden');
-  }, prefs);
+  }, prefs, {
+    currentMember,
+    onToggleFavorite: async (recipeUid) => {
+      if (!currentMember) return false;
+      return await toggleFavorite(recipeUid, currentMember);
+    }
+  });
 }
 
 // === Preferences Page ===
@@ -330,7 +340,9 @@ function setupManagePage() {
     };
 
     await saveRecipeToFirebase(recipe);
-    showToast(`"${name}" saved! Refresh to see it in the recipe list.`);
+    await loadRecipes();
+    refreshManageRecipeList();
+    showToast(`"${name}" saved!`);
 
     // Clear form
     document.getElementById('new-recipe-name').value = '';
@@ -343,6 +355,45 @@ function setupManagePage() {
     document.getElementById('new-recipe-source').value = '';
     document.getElementById('new-recipe-notes').value = '';
   });
+
+  document.getElementById('manage-search').addEventListener('input', () => refreshManageRecipeList());
+}
+
+function refreshManageRecipeList() {
+  const container = document.getElementById('manage-recipe-list');
+  const query = document.getElementById('manage-search').value.toLowerCase().trim();
+  let recipes = getRecipes();
+  if (query) {
+    recipes = recipes.filter(r =>
+      r.name.toLowerCase().includes(query) ||
+      (r.categories || []).some(c => c.toLowerCase().includes(query))
+    );
+  }
+
+  container.innerHTML = '';
+  for (const r of recipes) {
+    const row = document.createElement('div');
+    row.className = 'manage-recipe-row';
+    row.innerHTML = `
+      <span class="manage-recipe-name">${escManage(r.name)}</span>
+      <span class="manage-recipe-cats">${(r.categories || []).join(', ')}</span>
+      <button class="btn delete-btn">Delete</button>
+    `;
+    row.querySelector('.delete-btn').addEventListener('click', async () => {
+      if (!confirm(`Delete "${r.name}"? This can't be undone.`)) return;
+      await archiveRecipe(r.uid);
+      await loadRecipes();
+      refreshManageRecipeList();
+      showToast(`"${r.name}" deleted.`);
+    });
+    container.appendChild(row);
+  }
+}
+
+function escManage(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
 }
 
 // === Toast ===

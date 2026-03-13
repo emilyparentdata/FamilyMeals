@@ -111,6 +111,20 @@ function ratingLabel(rating) {
   return { love: 'Love It', like: 'Like It', acceptable: 'Acceptable', unknown: "Don't Know", unacceptable: 'Unacceptable' }[rating] || rating;
 }
 
+export async function toggleFavorite(recipeUid, memberName) {
+  const pref = getPreference(recipeUid, memberName);
+  const rating = pref?.rating || 'unknown';
+  const flags = { ...(pref?.flags || {}) };
+  flags.favorite = !flags.favorite;
+  await setPreference(recipeUid, memberName, rating, flags);
+  return flags.favorite;
+}
+
+export function isFavorite(recipeUid, memberName) {
+  const pref = getPreference(recipeUid, memberName);
+  return !!(pref?.flags?.favorite);
+}
+
 function escHtml(str) {
   const div = document.createElement('div');
   div.textContent = str || '';

@@ -48,7 +48,7 @@ export function getRecipeByUid(uid) {
   return allRecipes.find(r => r.uid === uid) || experimentRecipes.find(r => r.uid === uid);
 }
 
-export function renderRecipeList(container, recipes, onClick, preferences) {
+export function renderRecipeList(container, recipes, onClick, preferences, { currentMember, onToggleFavorite } = {}) {
   container.innerHTML = '';
   if (!recipes.length) {
     container.innerHTML = '<p style="color:var(--text-light);padding:2rem;">No recipes found.</p>';
@@ -71,12 +71,34 @@ export function renderRecipeList(container, recipes, onClick, preferences) {
     // Build rating summary from preferences
     const ratingHtml = buildRatingSummary(r.uid, preferences);
 
+    // Favorite button
+    const isFav = currentMember && preferences?.[`${r.uid}_${currentMember}`]?.flags?.favorite;
+    const favHtml = currentMember
+      ? `<button class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">${isFav ? '\u2764' : '\u2661'}</button>`
+      : '';
+
     card.innerHTML = `
-      <h3>${esc(r.name)}</h3>
+      <div class="recipe-card-top">
+        <h3>${esc(r.name)}</h3>
+        ${favHtml}
+      </div>
       <div class="recipe-meta">${meta.map(m => `<span>${esc(m)}</span>`).join('')}</div>
       ${ratingHtml}
       ${cats ? `<div class="recipe-categories">${cats}</div>` : ''}
     `;
+
+    // Favorite toggle
+    const favBtn = card.querySelector('.fav-btn');
+    if (favBtn && onToggleFavorite) {
+      favBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const nowFav = await onToggleFavorite(r.uid);
+        favBtn.textContent = nowFav ? '\u2764' : '\u2661';
+        favBtn.classList.toggle('active', nowFav);
+        favBtn.title = nowFav ? 'Remove from favorites' : 'Add to favorites';
+      });
+    }
+
     card.addEventListener('click', () => onClick(r));
     container.appendChild(card);
   }

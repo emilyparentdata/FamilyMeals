@@ -257,8 +257,10 @@ function suggestMealForDay(dayEl, members, recentUids, assignedThisWeek, assigne
     // Default: all meals acceptable unless someone rates "unacceptable"
     let score = 0;
     let acceptable = true;
+    let hasFavorite = false;
     for (const member of dayData.whoHome) {
       const pref = prefs[`${recipe.uid}_${member}`];
+      if (pref?.flags?.favorite) hasFavorite = true;
       if (!pref || !pref.rating || pref.rating === 'unknown') {
         // No rating or "don't know" — treat as acceptable (default assumption)
         score += 2;
@@ -271,6 +273,9 @@ function suggestMealForDay(dayEl, members, recentUids, assignedThisWeek, assigne
       score += { love: 4, like: 3, acceptable: 2 }[pref.rating] || 2;
     }
     if (!acceptable) continue;
+
+    // Boost favorited recipes
+    if (hasFavorite) score += 3;
 
     // Protein variety bonus/penalty
     const recipeProteins = detectProtein(recipe);
